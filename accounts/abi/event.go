@@ -118,7 +118,7 @@ func (e Event) singleUnpack(v interface{}, output []byte) error {
 	}
 
 	if e.Inputs[0].Indexed {
-		return fmt.Errorf("abi: attempting to unpack indexed variable into element.")
+		return fmt.Errorf("abi: attempting to unpack indexed variable into element")
 	}
 
 	value := valueOf.Elem()
@@ -127,8 +127,5 @@ func (e Event) singleUnpack(v interface{}, output []byte) error {
 	if err != nil {
 		return err
 	}
-	if err := set(value, reflect.ValueOf(marshalledValue), e.Inputs[0]); err != nil {
-		return err
-	}
-	return nil
+	return set(value, reflect.ValueOf(marshalledValue), e.Inputs[0])
 }
