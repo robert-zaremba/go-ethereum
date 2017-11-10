@@ -209,8 +209,29 @@ func bytesAreProper(output []byte) error {
 	if len(output) == 0 {
 		return fmt.Errorf("abi: unmarshalling empty output")
 	} else if len(output)%32 != 0 {
-		return fmt.Errorf("abi: improperly formatted output")
+		return fmt.Errorf("abi: improperly formatted output. %d", len(output))
 	} else {
 		return nil
 	}
+}
+
+// requireUnpackKind verifies preconditions for unpacking `args` into `kind`
+func requireUnpackKind(v reflect.Value, t reflect.Type, k reflect.Kind,
+	args []Argument, ignoreIndexed bool) error {
+
+	switch k {
+	case reflect.Struct:
+	case reflect.Slice, reflect.Array:
+		minLen := len(args)
+		if ignoreIndexed {
+			minLen = countNonIndexedArguments(args)
+		}
+		if v.Len() < minLen {
+			return fmt.Errorf("abi: insufficient number of elements in the list/array for unpack, want %d, got %d",
+				minLen, v.Len())
+		}
+	default:
+		return fmt.Errorf("abi: cannot unmarshal tuple into %v", t)
+	}
+	return nil
 }
