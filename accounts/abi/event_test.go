@@ -157,6 +157,16 @@ func TestEventTupleUnpack(t *testing.T) {
 		"Can unpack Pledge event into slice",
 	}, {
 		pledgeData1,
+		&[3]interface{}{&common.Address{}, &bigint, &[3]byte{}},
+		&[3]interface{}{
+			&addr,
+			&bigintExpected2,
+			&[3]byte{'u', 's', 'd'}},
+		jsonEventPledge,
+		"",
+		"Can unpack Pledge event into an array",
+	}, {
+		pledgeData1,
 		&[]interface{}{new(int), 0, 0},
 		&[]interface{}{},
 		jsonEventPledge,
