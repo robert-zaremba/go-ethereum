@@ -55,11 +55,29 @@ var jsonEventPledge = []byte(`{
   "type": "event"
 }`)
 
+// LogStaticArray(uint[3] indexed a, uint[3] b, string c);
+var jsonEventStaticArray = []byte(`{
+  "anonymous": false,
+  "inputs": [{
+      "indexed": true, "name": "a", "type": "uint256[3]"
+    }, {
+      "indexed": false, "name": "b", "type": "uint256[3]"
+    }, {
+      "indexed": false, "name": "c", "type": "string"
+  }],
+  "name": "LogStaticArray",
+  "type": "event"
+}`)
+
 // 1000000
 var transferData1 = "00000000000000000000000000000000000000000000000000000000000f4240"
 
 // "0x00Ce0d46d924CC8437c806721496599FC3FFA268", 2218516807680, "usd"
 var pledgeData1 = "00000000000000000000000000ce0d46d924cc8437c806721496599fc3ffa2680000000000000000000000000000000000000000000000000000020489e800007573640000000000000000000000000000000000000000000000000000000000"
+
+// LogStaticArray([uint(1),2,3], [uint(4),5,6], "abc");
+// topics: [ '0x5bd247ff7033ae96613f65c11f8074e9b2f92187afa39bf5386ae114538c0393', '0x6e0c627900b24bd432fe7b1f713f1b0744091a646a9fe4a65a18dfed21f2949c' ]
+var staticArrayEventData = "000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000036162630000000000000000000000000000000000000000000000000000000000"
 
 func TestEventId(t *testing.T) {
 	var table = []struct {
@@ -193,6 +211,15 @@ func TestEventTupleUnpack(t *testing.T) {
 		jsonEventPledge,
 		"abi: cannot unmarshal tuple into map[string]interface {}",
 		"Can not unpack Pledge event into map",
+	}, {
+		staticArrayEventData,
+		&[3]interface{}{&[3]*big.Int{}, new(string)},
+		&[3]interface{}{
+			&[3]*big.Int{big.NewInt(4), big.NewInt(5), big.NewInt(6)},
+			strPtr("abc")},
+		jsonEventStaticArray,
+		"",
+		"Can unpack LogStaticArray event into an array",
 	}}
 
 	for _, tc := range testCases {
@@ -217,4 +244,8 @@ func unpackTestEventData(dest interface{}, hexData string, jsonEvent []byte, ass
 	assert.NoError(json.Unmarshal(jsonEvent, &e), "Should be able to unmarshal event ABI")
 	a := ABI{Events: map[string]Event{"e": e}}
 	return a.Unpack(dest, "e", data)
+}
+
+func strPtr(s string) *string {
+	return &s
 }
